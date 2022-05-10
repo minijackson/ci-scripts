@@ -189,3 +189,56 @@ jobs:
       run: python cue.py -T 15M test
     - name: Collect and show test results
       run: python cue.py test-results
+
+  build-linux-cross-arm:
+    name: Linux cross ${{ matrix.arm }} / ${{ matrix.configuration }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    env:
+      CMP: ${{ matrix.cmp }}
+      BCFG: ${{ matrix.configuration }}
+      LINUX_CROSS_arm: ${{ matrix.arm }}
+      APT: re2c g++-${{ matrix.arm }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04]
+        cmp: [gcc]
+        configuration: [default, static, debug, static-debug]
+        arm: [arm-linux-gnueabi, arm-linux-gnueabihf]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Prepare and compile dependencies
+      run: python cue.py prepare
+    - name: Build main module (example app)
+      run: python cue.py build
+    - name: Run main module tests
+      run: python cue.py -T 15M test
+    - name: Collect and show test results
+      run: python cue.py test-results
+
+
+  build-linux-cross-aarch64:
+    name: Linux cross ${{ matrix.aarch64 }} / ${{ matrix.configuration }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    env:
+      CMP: ${{ matrix.cmp }}
+      BCFG: ${{ matrix.configuration }}
+      LINUX_CROSS_aarch64: ${{ matrix.aarch64 }}
+      APT: re2c g++-${{ matrix.aarch64 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04]
+        cmp: [gcc]
+        configuration: [default, static, debug, static-debug]
+        aarch64: [aarch64-linux-gnu]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Prepare and compile dependencies
+      run: python cue.py prepare
+    - name: Build main module (example app)
+      run: python cue.py build
+    - name: Run main module tests
+      run: python cue.py -T 15M test
+    - name: Collect and show test results
+      run: python cue.py test-results

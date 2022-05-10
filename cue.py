@@ -932,6 +932,32 @@ RTEMS_BASE=/opt/rtems/{0}'''.format(os.environ['RTEMS']))
 CROSS_COMPILER_TARGET_ARCHS += {0}
 '''.format(rtems_target))
 
+            # Cross compilation on Linux to other Linux targets (e.g. linux-arm)
+            linux_cross = [
+                (name[len("LINUX_CROSS_"):], cross_compiler_prefix)
+                for (name, cross_compiler_prefix) in os.environ.items()
+                if name.startswith("LINUX_CROSS_")
+            ]
+            for (linux_arch, cross_compiler_prefix) in linux_cross:
+                arch = "linux-" + linux_arch
+                print('Cross compiler {0}'.format(arch))
+                with open(os.path.join(places['EPICS_BASE'], 'configure', 'os',
+                                       'CONFIG_SITE.linux-x86_64.' + arch), 'w') as f:
+                    f.write('''
+GNU_TARGET={0}
+COMMANDLINE_LIBRARY=EPICS'''.format(cross_compiler_prefix))
+
+                print(
+                    "Setting up Linux cross-compiling arch {0} with prefix {1}".format(
+                        arch, cross_compiler_prefix
+                    )
+                )
+
+                with open(os.path.join(places['EPICS_BASE'], 'configure', 'CONFIG_SITE'), 'a') as f:
+                    f.write('''
+CROSS_COMPILER_TARGET_ARCHS += {0}
+'''.format(arch))
+
         print('Host compiler', ci['compiler'])
 
         if ci['compiler'].startswith('clang'):
