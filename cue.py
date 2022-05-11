@@ -903,6 +903,9 @@ def prepare_rtems_cross(version):
         },
     )
 
+    ci["apt"].extend(
+        ["re2c", "g++-mingw-w64-i686", "g++-mingw-w64-x86-64", "qemu-system-x86"]
+    )
 
 def download_rtems(version, rtems_bsp):
     rsb_release = os.environ.get("RSB_BUILD", "20210306")
@@ -1075,21 +1078,6 @@ def prepare(args):
         cxx = re.sub(r'clang', r'clang++', ci['compiler'])
     elif ci['compiler'].startswith('gcc'):
         cxx = re.sub(r'gcc', r'g++', ci['compiler'])
-
-    # Cross compilation on Linux to RTEMS  (set RTEMS to version "4.9", "4.10")
-    # requires qemu, bison, flex, texinfo, install-info
-    # rtems_bsp is needed also if Base is from cache
-    if 'RTEMS' in os.environ:
-        if 'RTEMS_TARGET' in os.environ:
-            rtems_target = os.environ['RTEMS_TARGET']
-        elif os.path.exists(os.path.join(places['EPICS_BASE'], 'configure', 'os',
-                                         'CONFIG.Common.RTEMS-pc386-qemu')):
-            # Base 3.15 doesn't have -qemu target architecture
-            rtems_target = 'RTEMS-pc386-qemu'
-        else:
-            rtems_target = 'RTEMS-pc386'
-        # eg. "RTEMS-pc386" or "RTEMS-pc386-qemu" -> "pc386"
-        rtems_bsp = re.match('^RTEMS-([^-]*)(?:-qemu)?$', rtems_target).group(1)
 
     if not os.path.isdir(toolsdir):
         os.makedirs(toolsdir)

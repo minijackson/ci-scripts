@@ -13,6 +13,7 @@ env:
   BREW: re2c
 
 jobs:
+
   build-cross:
     name: cross ${{ matrix.cross }} / ${{ matrix.cmp }} / ${{ matrix.configuration }}
     runs-on: ubuntu-20.04
@@ -37,10 +38,37 @@ jobs:
         - WINE
         - WINE@32
         - WINE@64
-        - RTEMS
-        - RTEMS@5
         - RTEMS@4.10
         - RTEMS@4.9
+    steps:
+    - uses: actions/checkout@v2
+    - name: Prepare and compile dependencies
+      run: python cue.py prepare
+    - name: Build main module (example app)
+      run: python cue.py build
+    - name: Run main module tests
+      run: python cue.py -T 15M test
+    - name: Collect and show test results
+      run: python cue.py test-results
+
+  build-cross:
+    name: cross ${{ matrix.cross }} / ${{ matrix.cmp }} / ${{ matrix.configuration }}
+    runs-on: ubuntu-20.04
+    env:
+      CMP: gcc
+      BCFG: default
+      CI_CROSS_TARGETS: ${{ matrix.cross }}
+      APT: re2c
+      RTEMS_TARGET: RTEMS-pc686-qemu
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04]
+        cmp: [gcc]
+        configuration: [default]
+        cross: 
+        - RTEMS
+        - RTEMS@5
     steps:
     - uses: actions/checkout@v2
     - name: Prepare and compile dependencies
