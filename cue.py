@@ -1015,7 +1015,7 @@ def prepare_linux_cross(epics_arch, gnu_arch):
 
     edit_make_file(
         "w",
-        ["configure", "os", "CONFIG.linux-x86_64." + epics_arch],
+        ["configure", "os", "CONFIG_SITE.linux-x86_64." + epics_arch],
         {
             "GNU_TARGET": gnu_arch,
             "COMMANDLINE_LIBRARY": "EPICS",
