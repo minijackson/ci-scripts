@@ -863,9 +863,9 @@ def prepare_rtems_cross(version):
     """Prepare the configuration for RTEMS cross-compilation for the given
     RTEMS version.
 
-    If version is None, it defaults to version 5."""
+    If version is None, it defaults to version 4.10."""
     if version is None:
-        version or "5"
+        version = "4.10"
 
     if "RTEMS_TARGET" in os.environ:
         rtems_target = os.environ["RTEMS_TARGET"]
