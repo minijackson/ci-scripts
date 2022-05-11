@@ -809,7 +809,7 @@ def edit_make_file(mode, path, values):
             else:
                 op = "="
 
-            f.write(variable + op + value)
+            f.write(variable + op + value + "\n")
 
 
 def handle_old_cross_variables():
