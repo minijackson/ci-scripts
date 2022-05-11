@@ -1091,6 +1091,9 @@ def prepare(args):
         # eg. "RTEMS-pc386" or "RTEMS-pc386-qemu" -> "pc386"
         rtems_bsp = re.match('^RTEMS-([^-]*)(?:-qemu)?$', rtems_target).group(1)
 
+    if not os.path.isdir(toolsdir):
+        os.makedirs(toolsdir)
+
     if 'BASE' in modules_to_compile or building_base:
         fold_start('set.up.epics_build', 'Configuring EPICS build system')
 
@@ -1197,9 +1200,6 @@ PERL = C:/Strawberry/perl/bin/perl -CSD'''
 
         fold_end('set.up.epics_build', 'Configuring EPICS build system')
 
-    if not os.path.isdir(toolsdir):
-        os.makedirs(toolsdir)
-
     if ci['os'] == 'windows' and ci['choco']:
         fold_start('install.choco', 'Installing CHOCO packages')
         sp.check_call(['choco', 'install'] + ci['choco'] + ['-y', '--limitoutput', '--no-progress'])
@@ -1215,26 +1215,6 @@ PERL = C:/Strawberry/perl/bin/perl -CSD'''
         fold_start('install.homebrew', 'Installing Homebrew packages')
         sp.check_call(['brew', 'install'] + ci['homebrew'])
         fold_end('install.homebrew', 'Installing Homebrew packages')
-
-    # if ci['os'] == 'linux' and 'RTEMS' in os.environ:
-    #     rsb_release = os.environ.get('RSB_BUILD', '20210306')
-    #     tar_name = '{0}-rtems{1}.tar.xz'.format(rtems_bsp, os.environ['RTEMS'])
-    #     print('Downloading RTEMS {0} cross compiler: {1}'
-    #           .format(os.environ['RTEMS'], tar_name))
-    #     sys.stdout.flush()
-    #     sp.check_call(['curl', '-fsSL', '--retry', '3', '-o', tar_name,
-    #                    'https://github.com/mdavidsaver/rsb/releases/download/{0}%2F{1}/{2}'
-    #                   .format(os.environ['RTEMS'], rsb_release, tar_name)],
-    #                   cwd=toolsdir)
-    #     sudo_prefix = []
-    #     if ci['service'] == 'github-actions':
-    #         sudo_prefix = ['sudo']
-    #     sp.check_call(sudo_prefix + ['tar', '-C', '/', '-xmJ', '-f', os.path.join(toolsdir, tar_name)])
-    #     os.remove(os.path.join(toolsdir, tar_name))
-    #     for rtems_cc in glob('/opt/rtems/*/bin/*-gcc'):
-    #         print('{0}{1} --version{2}'.format(ANSI_CYAN, rtems_cc, ANSI_RESET))
-    #         sys.stdout.flush()
-    #         sp.check_call([rtems_cc, '--version'])
 
     setup_for_build(args)
 
