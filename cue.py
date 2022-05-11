@@ -884,7 +884,7 @@ def prepare_rtems_cross(version):
     print("Cross compiler RTEMS{0} @ {1}".format(version, rtems_target))
 
     if ci["os"] == "linux":
-        download_rtems()
+        download_rtems(version, rtems_bsp)
 
     edit_make_file(
         "a",
