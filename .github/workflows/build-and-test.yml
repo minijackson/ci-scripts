@@ -31,7 +31,7 @@ jobs:
         - linux-aarch64
         - linux-arm
         - linux-arm@arm-linux-gnueabi
-        - linux-arm@arm-linux-gnueabi
+        - linux-arm@arm-linux-gnueabihf
         - linux-ppc
         - linux-ppc64
         - WINE

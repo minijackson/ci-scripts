@@ -881,7 +881,7 @@ def prepare_rtems_cross(version):
     # eg. "RTEMS-pc386" or "RTEMS-pc386-qemu" -> "pc386"
     rtems_bsp = re.match("^RTEMS-([^-]*)(?:-qemu)?$", rtems_target).group(1)
 
-    print("Cross compiler RTEMS{0} @ {1}".format(os.environ["RTEMS"], rtems_target))
+    print("Cross compiler RTEMS{0} @ {1}".format(version, rtems_target))
 
     if ci["os"] == "linux":
         download_rtems()
