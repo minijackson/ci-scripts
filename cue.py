@@ -994,11 +994,11 @@ def prepare_linux_cross(epics_arch, gnu_arch):
         elif epics_arch == "linux-arm":
             gnu_arch = "arm-linux-gnueabi"
         elif epics_arch == "linux-aarch64":
-            gnu_arch = "aarch64-linux-gnueabi"
+            gnu_arch = "aarch64-linux-gnu"
         elif epics_arch == "linux-ppc":
-            gnu_arch = "powerpc-linux-gnueabi"
+            gnu_arch = "powerpc-linux-gnu"
         elif epics_arch == "linux-ppc64":
-            gnu_arch = "powerpc64le-linux-gnueabi"
+            gnu_arch = "powerpc64le-linux-gnu"
         else:
             raise ValueError(
                 "Could not guess the GNU architecture for EPICS arch: {}. "
