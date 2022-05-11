@@ -27,7 +27,7 @@ jobs:
         os: [ubuntu-20.04]
         cmp: [gcc]
         configuration: [default]
-        cross: [aarch64-linux-gnu]
+        cross: [linux-aarch64]
     steps:
     - uses: actions/checkout@v2
     - name: Prepare and compile dependencies
