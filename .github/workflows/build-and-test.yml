@@ -13,34 +13,20 @@ env:
   BREW: re2c
 
 jobs:
-  unit-test:
-    name: Unit tests on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  build-cross:
+    name: cross ${{ matrix.cross }} / ${{ matrix.cmp }} / ${{ matrix.configuration }}
+    runs-on: ubuntu-20.04
+    env:
+      CMP: gcc
+      BCFG: default
+      CI_CROSS_TARGETS: ${{ matrix.cross }}
+      APT: re2c
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04, windows-2019, windows-2016, macos-10.15]
     steps:
     - uses: actions/checkout@v2
-    - name: Show initial environment
-      run: python cue-test.py env
-    - name: Run unit tests
-      run: python cue-test.py
-
-  build-linux:
-    name: ${{ matrix.cmp }} / ${{ matrix.configuration }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    env:
-      CMP: ${{ matrix.cmp }}
-      BCFG: ${{ matrix.configuration }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04]
-        cmp: [gcc, clang]
-        configuration: [default, static, debug, static-debug]
-    steps:
-    - uses: actions/checkout@v2
     - name: Prepare and compile dependencies
       run: python cue.py prepare
     - name: Build main module (example app)
@@ -50,195 +36,232 @@ jobs:
     - name: Collect and show test results
       run: python cue.py test-results
 
-  build-linux-old:
-    name: ${{ matrix.cmp }} / ${{ matrix.configuration }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    env:
-      CMP: ${{ matrix.cmp }}
-      BCFG: ${{ matrix.configuration }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-16.04]
-        cmp: ["gcc-4.8", "gcc-4.9"]
-        configuration: [default, static]
-    steps:
-    - uses: actions/checkout@v2
-    - name: "apt-get install ${{ matrix.cmp }}"
-      run: |
-        export GCC_NAME="${{ matrix.cmp }}"
-        sudo apt-get update
-        sudo apt-get -y install software-properties-common
-        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-        sudo apt-get update
-        sudo apt-get -y install g++-${GCC_NAME#gcc-}
-    - name: Prepare and compile dependencies
-      run: python cue.py prepare
-    - name: Build main module (example app)
-      run: python cue.py build
-    - name: Run main module tests
-      run: python cue.py -T 15M test
-    - name: Collect and show test results
-      run: python cue.py test-results
+  # unit-test:
+  #   name: Unit tests on ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04, windows-2019, windows-2016, macos-10.15]
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Show initial environment
+  #     run: python cue-test.py env
+  #   - name: Run unit tests
+  #     run: python cue-test.py
+  #
+  # build-linux:
+  #   name: ${{ matrix.cmp }} / ${{ matrix.configuration }} / ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     CMP: ${{ matrix.cmp }}
+  #     BCFG: ${{ matrix.configuration }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04]
+  #       cmp: [gcc, clang]
+  #       configuration: [default, static, debug, static-debug]
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Prepare and compile dependencies
+  #     run: python cue.py prepare
+  #   - name: Build main module (example app)
+  #     run: python cue.py build
+  #   - name: Run main module tests
+  #     run: python cue.py -T 15M test
+  #   - name: Collect and show test results
+  #     run: python cue.py test-results
+  #
+  # build-linux-old:
+  #   name: ${{ matrix.cmp }} / ${{ matrix.configuration }} / ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     CMP: ${{ matrix.cmp }}
+  #     BCFG: ${{ matrix.configuration }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-16.04]
+  #       cmp: ["gcc-4.8", "gcc-4.9"]
+  #       configuration: [default, static]
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: "apt-get install ${{ matrix.cmp }}"
+  #     run: |
+  #       export GCC_NAME="${{ matrix.cmp }}"
+  #       sudo apt-get update
+  #       sudo apt-get -y install software-properties-common
+  #       sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  #       sudo apt-get update
+  #       sudo apt-get -y install g++-${GCC_NAME#gcc-}
+  #   - name: Prepare and compile dependencies
+  #     run: python cue.py prepare
+  #   - name: Build main module (example app)
+  #     run: python cue.py build
+  #   - name: Run main module tests
+  #     run: python cue.py -T 15M test
+  #   - name: Collect and show test results
+  #     run: python cue.py test-results
+  #
+  # build-macos:
+  #   name: ${{ matrix.cmp }} / ${{ matrix.configuration }} / ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     CMP: ${{ matrix.cmp }}
+  #     BCFG: ${{ matrix.configuration }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [macos-10.15]
+  #       cmp: [clang]
+  #       configuration: [default, debug]
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Prepare and compile dependencies
+  #     run: python cue.py prepare
+  #   - name: Build main module (example app)
+  #     run: python cue.py build
+  #   - name: Run main module tests
+  #     run: python cue.py -T 15M test
+  #   - name: Collect and show test results
+  #     run: python cue.py test-results
+  #
+  # build-windows:
+  #   name: ${{ matrix.cmp }} / ${{ matrix.configuration }} / ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     CMP: ${{ matrix.cmp }}
+  #     BCFG: ${{ matrix.configuration }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [windows-2019, windows-2016]
+  #       cmp: [gcc, vs2019, vs2017]
+  #       configuration: [default, static, debug, static-debug]
+  #       exclude:
+  #         - os: windows-2019
+  #           cmp: vs2017
+  #         - os: windows-2016
+  #           cmp: vs2019
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Prepare and compile dependencies
+  #     run: python cue.py prepare
+  #   - name: Build main module (example app)
+  #     run: python cue.py build
+  #   - name: Run main module tests
+  #     run: python cue.py -T 15M test
+  #   - name: Collect and show test results
+  #     run: python cue.py test-results
 
-  build-macos:
-    name: ${{ matrix.cmp }} / ${{ matrix.configuration }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    env:
-      CMP: ${{ matrix.cmp }}
-      BCFG: ${{ matrix.configuration }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-10.15]
-        cmp: [clang]
-        configuration: [default, debug]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Prepare and compile dependencies
-      run: python cue.py prepare
-    - name: Build main module (example app)
-      run: python cue.py build
-    - name: Run main module tests
-      run: python cue.py -T 15M test
-    - name: Collect and show test results
-      run: python cue.py test-results
-
-  build-windows:
-    name: ${{ matrix.cmp }} / ${{ matrix.configuration }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    env:
-      CMP: ${{ matrix.cmp }}
-      BCFG: ${{ matrix.configuration }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-2019, windows-2016]
-        cmp: [gcc, vs2019, vs2017]
-        configuration: [default, static, debug, static-debug]
-        exclude:
-          - os: windows-2019
-            cmp: vs2017
-          - os: windows-2016
-            cmp: vs2019
-    steps:
-    - uses: actions/checkout@v2
-    - name: Prepare and compile dependencies
-      run: python cue.py prepare
-    - name: Build main module (example app)
-      run: python cue.py build
-    - name: Run main module tests
-      run: python cue.py -T 15M test
-    - name: Collect and show test results
-      run: python cue.py test-results
-
-  build-rtems:
-    name: RTEMS${{ matrix.rtems }} / ${{ matrix.rtems_target }}
-    runs-on: ubuntu-20.04
-    env:
-      CMP: gcc
-      BCFG: default
-      RTEMS: ${{ matrix.rtems }}
-      RTEMS_TARGET: ${{ matrix.rtems_target }}
-      APT: re2c g++-mingw-w64-i686 g++-mingw-w64-x86-64 qemu-system-x86
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - rtems: "4.9"
-            rtems_target: RTEMS-pc386-qemu
-
-          - rtems: "4.10"
-            rtems_target: RTEMS-pc386-qemu
-
-          - rtems: "5"
-            rtems_target: RTEMS-pc686-qemu
-    steps:
-    - uses: actions/checkout@v2
-    - name: Prepare and compile dependencies
-      run: python cue.py prepare
-    - name: Build main module (example app)
-      run: python cue.py build
-    - name: Run main module tests
-      run: python cue.py -T 15M test
-    - name: Collect and show test results
-      run: python cue.py test-results
-
-  build-wine:
-    name: WINE${{ matrix.wine }} / ${{ matrix.configuration }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    env:
-      CMP: ${{ matrix.cmp }}
-      BCFG: ${{ matrix.configuration }}
-      WINE: ${{ matrix.wine }}
-      APT: re2c g++-mingw-w64-i686 g++-mingw-w64-x86-64
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-18.04]
-        cmp: [gcc]
-        configuration: [default, static, debug, static-debug]
-        wine: [32, 64]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Prepare and compile dependencies
-      run: python cue.py prepare
-    - name: Build main module (example app)
-      run: python cue.py build
-    - name: Run main module tests
-      run: python cue.py -T 15M test
-    - name: Collect and show test results
-      run: python cue.py test-results
-
-  build-linux-cross-arm:
-    name: Linux cross ${{ matrix.arm }} / ${{ matrix.configuration }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    env:
-      CMP: ${{ matrix.cmp }}
-      BCFG: ${{ matrix.configuration }}
-      LINUX_CROSS_arm: ${{ matrix.arm }}
-      APT: re2c g++-${{ matrix.arm }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-20.04]
-        cmp: [gcc]
-        configuration: [default, static, debug, static-debug]
-        arm: [arm-linux-gnueabi, arm-linux-gnueabihf]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Prepare and compile dependencies
-      run: python cue.py prepare
-    - name: Build main module (example app)
-      run: python cue.py build
-    - name: Run main module tests
-      run: python cue.py -T 15M test
-    - name: Collect and show test results
-      run: python cue.py test-results
-
-
-  build-linux-cross-aarch64:
-    name: Linux cross ${{ matrix.aarch64 }} / ${{ matrix.configuration }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    env:
-      CMP: ${{ matrix.cmp }}
-      BCFG: ${{ matrix.configuration }}
-      LINUX_CROSS_aarch64: ${{ matrix.aarch64 }}
-      APT: re2c g++-${{ matrix.aarch64 }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-20.04]
-        cmp: [gcc]
-        configuration: [default, static, debug, static-debug]
-        aarch64: [aarch64-linux-gnu]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Prepare and compile dependencies
-      run: python cue.py prepare
-    - name: Build main module (example app)
-      run: python cue.py build
-    - name: Run main module tests
-      run: python cue.py -T 15M test
-    - name: Collect and show test results
-      run: python cue.py test-results
+  # build-rtems:
+  #   name: RTEMS${{ matrix.rtems }} / ${{ matrix.rtems_target }}
+  #   runs-on: ubuntu-20.04
+  #   env:
+  #     CMP: gcc
+  #     BCFG: default
+  #     RTEMS: ${{ matrix.rtems }}
+  #     RTEMS_TARGET: ${{ matrix.rtems_target }}
+  #     APT: re2c g++-mingw-w64-i686 g++-mingw-w64-x86-64 qemu-system-x86
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - rtems: "4.9"
+  #           rtems_target: RTEMS-pc386-qemu
+  #
+  #         - rtems: "4.10"
+  #           rtems_target: RTEMS-pc386-qemu
+  #
+  #         - rtems: "5"
+  #           rtems_target: RTEMS-pc686-qemu
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Prepare and compile dependencies
+  #     run: python cue.py prepare
+  #   - name: Build main module (example app)
+  #     run: python cue.py build
+  #   - name: Run main module tests
+  #     run: python cue.py -T 15M test
+  #   - name: Collect and show test results
+  #     run: python cue.py test-results
+  #
+  # build-wine:
+  #   name: WINE${{ matrix.wine }} / ${{ matrix.configuration }} / ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     CMP: ${{ matrix.cmp }}
+  #     BCFG: ${{ matrix.configuration }}
+  #     WINE: ${{ matrix.wine }}
+  #     APT: re2c g++-mingw-w64-i686 g++-mingw-w64-x86-64
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-18.04]
+  #       cmp: [gcc]
+  #       configuration: [default, static, debug, static-debug]
+  #       wine: [32, 64]
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Prepare and compile dependencies
+  #     run: python cue.py prepare
+  #   - name: Build main module (example app)
+  #     run: python cue.py build
+  #   - name: Run main module tests
+  #     run: python cue.py -T 15M test
+  #   - name: Collect and show test results
+  #     run: python cue.py test-results
+  #
+  # build-linux-cross-arm:
+  #   name: Linux cross ${{ matrix.arm }} / ${{ matrix.configuration }} / ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     CMP: ${{ matrix.cmp }}
+  #     BCFG: ${{ matrix.configuration }}
+  #     LINUX_CROSS_arm: ${{ matrix.arm }}
+  #     APT: re2c g++-${{ matrix.arm }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-20.04]
+  #       cmp: [gcc]
+  #       configuration: [default, static, debug, static-debug]
+  #       arm: [arm-linux-gnueabi, arm-linux-gnueabihf]
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Prepare and compile dependencies
+  #     run: python cue.py prepare
+  #   - name: Build main module (example app)
+  #     run: python cue.py build
+  #   - name: Run main module tests
+  #     run: python cue.py -T 15M test
+  #   - name: Collect and show test results
+  #     run: python cue.py test-results
+  #
+  #
+  # build-linux-cross-aarch64:
+  #   name: Linux cross ${{ matrix.aarch64 }} / ${{ matrix.configuration }} / ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     CMP: ${{ matrix.cmp }}
+  #     BCFG: ${{ matrix.configuration }}
+  #     LINUX_CROSS_aarch64: ${{ matrix.aarch64 }}
+  #     APT: re2c g++-${{ matrix.aarch64 }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-20.04]
+  #       cmp: [gcc]
+  #       configuration: [default, static, debug, static-debug]
+  #       aarch64: [aarch64-linux-gnu]
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Prepare and compile dependencies
+  #     run: python cue.py prepare
+  #   - name: Build main module (example app)
+  #     run: python cue.py build
+  #   - name: Run main module tests
+  #     run: python cue.py -T 15M test
+  #   - name: Collect and show test results
+  #     run: python cue.py test-results
