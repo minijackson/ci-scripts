@@ -1144,7 +1144,7 @@ endif''')
 
             for cross_target_info in os.environ.get("CI_CROSS_TARGETS", "").split(":"):
                 if cross_target_info == "":
-                    pass
+                    continue
                 prepare_cross_compilation(cross_target_info)
 
         print('Host compiler', ci['compiler'])
