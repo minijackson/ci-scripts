@@ -1023,7 +1023,7 @@ def prepare_linux_cross(epics_arch, gnu_arch):
     )
 
     edit_make_file(
-        "w",
+        "a",
         ["configure", "CONFIG_SITE"],
         {"CROSS_COMPILER_TARGET_ARCHS": "+" + epics_arch},
     )
