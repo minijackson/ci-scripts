@@ -27,7 +27,20 @@ jobs:
         os: [ubuntu-20.04]
         cmp: [gcc]
         configuration: [default]
-        cross: [linux-aarch64]
+        cross: 
+        - linux-aarch64
+        - linux-arm
+        - linux-arm@arm-linux-gnueabi
+        - linux-arm@arm-linux-gnueabi
+        - linux-ppc
+        - linux-ppc64
+        - WINE
+        - WINE@32
+        - WINE@64
+        - RTEMS
+        - RTEMS@5
+        - RTEMS@4.10
+        - RTEMS@4.9
     steps:
     - uses: actions/checkout@v2
     - name: Prepare and compile dependencies
