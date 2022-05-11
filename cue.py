@@ -972,7 +972,7 @@ def prepare_wine_cross(bits):
         {"CROSS_COMPILER_TARGET_ARCHS": "+" + epics_arch},
     )
 
-    ci['apt'].extends(["re2c", "g++-" + deb_arch])
+    ci['apt'].extend(["re2c", "g++-" + deb_arch])
 
 
 def prepare_linux_cross(epics_arch, gnu_arch):
@@ -1028,7 +1028,7 @@ def prepare_linux_cross(epics_arch, gnu_arch):
         {"CROSS_COMPILER_TARGET_ARCHS": "+" + epics_arch},
     )
 
-    ci["apt"].extends(["re2c", "g++-" + gnu_arch])
+    ci["apt"].extend(["re2c", "g++-" + gnu_arch])
 
 
 def prepare(args):
