@@ -846,10 +846,10 @@ def prepare_cross_compilation(cross_target_info):
 
     target = cross_target_info[0]
 
-    if target == "RTEMS":
-        prepare_rtems_cross(target_param)
-    elif target == "WINE":
-        prepare_wine_cross(target_param)
+    if target.startswith("RTEMS-"):
+        prepare_rtems_cross(target, target_param)
+    elif target.endswith("-mingw"):
+        prepare_wine_cross(target, target_param)
     elif target.startswith("linux-"):
         prepare_linux_cross(target, target_param)
     else:
@@ -859,29 +859,22 @@ def prepare_cross_compilation(cross_target_info):
         )
 
 
-def prepare_rtems_cross(version):
+def prepare_rtems_cross(epics_arch, version):
     """Prepare the configuration for RTEMS cross-compilation for the given
     RTEMS version.
 
-    If version is None, it defaults to version 4.10."""
+    If version is None, it defaults to version 5 for RTEMS-pc686-*, 4.10
+    otherwise."""
     if version is None:
-        version = "4.10"
+        if epics_arch.startswith("RTEMS-pc686"):
+            version = "5"
+        else:
+            version = "4.10"
 
-    if "RTEMS_TARGET" in os.environ:
-        rtems_target = os.environ["RTEMS_TARGET"]
-    elif os.path.exists(
-        os.path.join(
-            places["EPICS_BASE"], "configure", "os", "CONFIG.Common.RTEMS-pc386-qemu"
-        )
-    ):
-        # Base 3.15 doesn't have -qemu target architecture
-        rtems_target = "RTEMS-pc386-qemu"
-    else:
-        rtems_target = "RTEMS-pc386"
     # eg. "RTEMS-pc386" or "RTEMS-pc386-qemu" -> "pc386"
-    rtems_bsp = re.match("^RTEMS-([^-]*)(?:-qemu)?$", rtems_target).group(1)
+    rtems_bsp = re.match("^RTEMS-([^-]*)(?:-qemu)?$", epics_arch).group(1)
 
-    print("Cross compiler RTEMS{0} @ {1}".format(version, rtems_target))
+    print("Cross compiler RTEMS{0} @ {1}".format(version, epics_arch))
 
     if ci["os"] == "linux":
         download_rtems(version, rtems_bsp)
@@ -898,9 +891,7 @@ def prepare_rtems_cross(version):
     edit_make_file(
         "a",
         ["configure", "CONFIG_SITE"],
-        {
-            "CROSS_COMPILER_TARGET_ARCHS": rtems_target,
-        },
+        {"CROSS_COMPILER_TARGET_ARCHS": epics_arch},
     )
 
     ci["apt"].extend(
@@ -939,26 +930,22 @@ def download_rtems(version, rtems_bsp):
         sp.check_call([rtems_cc, "--version"])
 
 
-def prepare_wine_cross(bits):
-    """Prepare the configuration for Wine cross-compilation for the given
-    address size.
+def prepare_wine_cross(epics_arch):
+    """Prepare the configuration for Wine cross-compilation for the given mingw
+    architecture."""
 
-    If bits is None, it defaults to "64"."""
-    if bits is None:
-        bits = "64"
-
-    if bits == "32":
-        epics_arch = "win32-x86-mingw"
+    if epics_arch == "win32-x86-mingw":
         gnu_arch = "i686-w64-mingw32"
         deb_arch = "mingw-w64-i686"
-    elif bits == "64":
-        epics_arch = "windows-x64-mingw"
+        bits = "32"
+    elif epics_arch == "windows-x64-mingw":
         gnu_arch = "x86_64-w64-mingw32"
         deb_arch = "mingw-w64-x86-64"
+        bits = "64"
     else:
         raise ValueError(
-            "Unknown number of bits '{0}' for WINE. "
-            "Please see the ci-scripts README for available values.".format(bits)
+            "Unknown architecture '{0}' for WINE target. "
+            "Please see the ci-scripts README for available values.".format(epics_arch)
         )
 
     print("Cross compiler mingw{} / Wine".format(bits))
