@@ -849,7 +849,7 @@ def prepare_cross_compilation(cross_target_info):
     if target.startswith("RTEMS-"):
         prepare_rtems_cross(target, target_param)
     elif target.endswith("-mingw"):
-        prepare_wine_cross(target, target_param)
+        prepare_wine_cross(target)
     elif target.startswith("linux-"):
         prepare_linux_cross(target, target_param)
     else:
